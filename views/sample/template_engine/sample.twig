@@ -1,0 +1,12 @@
+<h2> Basic Twig </h2>
+
+<p>
+    <b>A variable : </b> {{ var }}
+</p>
+
+ <b>Array : </b> 
+<ul id="navigation">
+    {% for item in items %}
+        <li><a href="{{ item.href }}">{{ item.label }}</a></li>
+    {% endfor %}
+ </ul>

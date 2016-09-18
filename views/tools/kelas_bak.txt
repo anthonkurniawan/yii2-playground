@@ -1,0 +1,707 @@
+<?php
+/* @var $this yii\web\View */
+use yii\widgets\menu;
+use my\SideMenu;
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\helpers\VarDumper;
+
+$this->registerJsFile(Yii::$app->homeUrl.'/js/underscore.js', ['depends' => [\yii\web\JqueryAsset::className()]]);
+$this->title = Yii::t('app', 'Fetch Class');
+?>
+
+<style>
+.container{ width: 100% }
+div.left_menu, div.right_menu{ top:0px; width: auto;}
+div.left_menu, div.right_menu ul{ display: block; list-style-type: disc;}
+.cmd_line{margin:0px}
+.box1 { border:1px solid beige; font-size:11px}
+#tree_obj ul{font-size:12px}
+.label {cursor: pointer}
+.badge{cursor:pointer}
+ul{-webkit-padding-start:20px}
+ul li {white-space: nowrap}
+.ul li{ font-size:10px}
+.nowrap{white-space: nowrap}
+.check span{cursor: pointer}
+.method_res{background-color:purple; color:white; font-size:11px; overflow:auto}
+.method_res a{ color: yellow; text-decoration: underline;}
+#properties{color:white; font-size:11px; background-color: darkred}   /* blueviolet, darkred, chocolate */
+#properties .text-primary{ font-size:12px; font-weight:bold;color:yellow}
+</style>
+<?php   
+//VarDumper::dump($this, 10, true); 
+//VarDumper::dump(Yii::$app->extensions, 10, true); 
+?>
+
+<?php 	
+#component definitions or the loaded component instances., TRUE : definition, FALSE : instance, def-->true
+$components = Yii::$app->getComponents(true);	//VarDumper::dump($components,10, true);  die();
+$models = $this->context->myModels;
+$controllers = $this->context->myControllers;
+$modules = Yii::$app->getModules();
+
+$sub_component['db'] = ['schema'=>'Schema', 'queryBuilder'=>'Query Builder']; //print_r($sub_component); die();
+
+$arr['yii'] = ['label'=>'YII Class - new Yii', 'url'=>Url::to(['tools/kelas', 'obj'=>'return new Yii']), 'items'=>[] ]; 
+$arr['yii']['items']['base'] = ['label'=>'YII Base', 'items'=>[] ];  // Html::encode(Url::to($item['url'])),
+$arr['yii']['items']['base']['items']['app'] = [ 'label'=>'Application - Yii::app()', 'url'=>Url::to(['tools/kelas', 'obj'=>'return Yii::$app']), 'options'=>[]];
+$arr['yii']['items']['base']['items']['components'] = ['label'=>'Application Component',  'options'=>[], 'activateParents'=>true, 'submenuTemplate'=> "\n<ul style='display:none'>\n{items}\n</ul>\n"];
+
+foreach($components as $key=>$value){		//echo "===>".$key; VarDumper::dump($value,10, true); die();
+    $label = is_object($value) ? get_class($value) : $value['class'];
+	$arr['yii']['items']['base']['items']['components']['items'][$key] = ['label'=>"{$key} ({$label})", 'url'=>Url::to(['tools/kelas', 'obj'=>$key]), 'options'=>[], 'visible'=>true, 'linkOpsi'=>'x' ];
+    if(array_key_exists($key, $sub_component)){
+        foreach($sub_component[$key] as $k=>$v)  //{echo "<br>".$k ."->"; print_r($v);}
+           $arr['yii']['items']['base']['items']['components']['items'][$key]['items'][$k] = ['label'=>"{$v} ({$k})", 'url'=>Url::to(['tools/kelas', 'obj'=>"return Yii::\$app->{$key}->{$k}"]), 'options'=>[]];
+    }
+}
+# LOAD ALL CONTROLLERS
+$arr['controllers'] = ['label'=>'All Controller', 'submenuTemplate'=> "\n<ul style='display:none'>\n{items}\n</ul>\n"];
+$arr['controllers']['items']['this'] = ['label'=>"this (Yii::\$app>controller)", 'url'=>Url::to(['tools/kelas', 'obj'=>"this"]), 'options'=>[]];
+foreach ($controllers as $key=>$controller)
+    $arr['controllers']['items'][$key] = ['label'=>"{$controller}", 'url'=>Url::to(['tools/kelas', 'obj'=>"return new app\\controllers\\{$controller}(\"fakeID-{$key}\",Yii::\$app)"]), 'options'=>[]];
+# LOAD ALL MODELS
+$arr['models'] = ['label'=>'All Models (Active Record)', 'submenuTemplate'=> "\n<ul style='display:none'>\n{items}\n</ul>\n"];
+foreach ($models as $key=>$model)
+    $arr['models']['items'][$key] = ['label'=>"{$model}", 'url'=>Url::to(['tools/kelas', 'obj'=>"return new app\\models\\{$model}"]), 'options'=>[], 'visible'=>true ];
+# LOAD ALL MODULES  
+$arr['modules'] = ['label'=>'All Modules', 'submenuTemplate'=> "\n<ul style='display:none'>\n{items}\n</ul>\n"];
+foreach ($modules as  $key=>$val){
+    $label = is_object($val) ? get_class($val) : $val['class'];
+    $arr['modules']['items'][$key] = ['label'=>"{$key} ({$label})", 'url'=>Url::to(['tools/kelas', 'obj'=>$key]), 'options'=>[] ];
+}
+# DECLARE CLASS PHP
+$arr['declareClass'] = ['label'=>'All Declare Class', 'items'=>[
+    'dec_class'=>[ 'label'=>'Declare Class', 'url'=>Url::to(['tools/kelas', 'dec'=>1, 'obj'=>"class"]),  'options'=>[], ],
+    'dec_interface'=>[ 'label'=>'Declare Interface', 'url'=>Url::to(['tools/kelas', 'dec'=>1, 'obj'=>"interface"]),  'options'=>[], ],
+    'dec_traits'=>[ 'label'=>'Declare Traits', 'url'=>Url::to(['tools/kelas', 'dec'=>1, 'obj'=>"traits"]),  'options'=>[], ],
+] ]; 
+//VarDumper::dump($arr,10, true); die();
+// .replace(/[/]/g,'\\')
+// array_multisort($link['yii-base']['items'], SORT_ASC);  echo "<pre>"; print_r($link); echo "</pre>";			
+?>
+ 
+<?php
+ // echo SideMenu::widget([]);
+ SideMenu::begin([
+	'title'=>'Menu',
+	'collapsed'=>false,
+	'position'=>'left',
+ ]);
+ ?>
+ <?php
+echo Menu::widget([
+    'items' => $arr,
+	'linkTemplate' => '<a href="{url}" class="get-class">{label}</a>',
+    'labelTemplate' => '<span onclick="$(this).siblings().slideToggle();">{label}</span>',
+	// 'itemOptions'=>['class'=>'test'],  # to include html attr to each items
+	// 'options'=>['style'=>'color:red'], # include html attr to container
+]);
+ ?>
+ <?php SideMenu::end(); ?>
+
+<div class="check well well-sm" style="margin:0px 0px 10px">
+    <?= Html::dropDownList('mode', 'show', ['show'=>'Show', 'code'=>'Code'], ['id'=>'mode'] ); ?>
+    <?= Html::checkbox('show_dump_obj', true, ['id'=>'show_dump_obj', "class"=>"opt_check"]);?>
+    <span style="margin-right:10px" onclick="toggleCheck('show_dump_obj')">Show dump object </span>
+    <?= Html::checkbox('show_tree_obj', true, ['id'=>'show_tree_obj', "class"=>"opt_check"]);?>
+    <span style="margin-right:10px" onclick="toggleCheck('show_tree_obj')">Show tree object </span>
+    <?= Html::checkbox('show_method', true, ['id'=>'show_method', "class"=>"opt_check"]);?>
+    <span style="margin-right:10px" onclick="toggleCheck('show_method')">Show method</span>
+    <?= Html::checkbox('show_method_val', true, ['id'=>'show_method_val', "class"=>"opt_check"]);?>
+    <span style="margin-right:10px" onclick="toggleCheck('show_method_val')">Show method value</span>
+    <?= Html::checkbox('show_method_ref', true, ['id'=>'show_method_ref', "class"=>"opt_check"]);?>
+    <span style="margin-right:10px" onclick="toggleCheck('show_method_ref')">Show method reference</span>
+    <?= Html::checkbox('show_cmd', true, ['id'=>'show_cmd', "class"=>"opt_check"]);?>
+    <span style="margin-right:10px" onclick="toggleCheck('show_cmd')">Show command console</span>
+    
+    <?= Html::input('text', 'obj_requested', false, ['id'=>'obj_requested', 'size'=>70]); ?>
+    <?= Html::button('resend', ['id'=>'resend_obj', 'class'=>'btn btn-sm btn-primary', 'style'=>'display:none', 'onclick'=>'getClass( $("#obj_requested").val() );']); ?>
+    
+    <b style="margin-left:10px">All Declared Class : </b>
+    <?= Html::a('Declared Class',  '#', array('class'=>'kelas label label-warning',  'onClick'=>"js:decClass('class')", 'style'=>'margin-right:5px'));?>
+    <?= Html::a('Declared Interfaces',  '#', array('class'=>'kelas label label-primary',  'onClick'=>"js:decClass('interface')", 'style'=>'margin-right:5px'));?>
+    <?= Html::a('Declared Traits',  '#', array('class'=>'kelas label label-success',  'onClick'=>"js:decClass('traits')", 'style'=>'margin-right:5px'));?>
+    <button onclick="sortClass()">sort</button>
+    <div id="toggleShow" class="btn-group btn-group-sm" style="display:none"></div>
+</div>
+
+<!----------------------------------------------------------------- MAIN RESULT -------------------------------------------------->
+<div id="load" class="pull-left loading box-load" style="width:50px;display:none">&nbsp;&nbsp;</div>
+<div id="mainBox" style="display:none">
+    <div id="dec_class"></div>
+    <div id="panel_class"></div> <!-- panel label class -->
+    <div class="input-group" style="display:none">
+        <?= Html::hiddenInput('cmd_hidden', null, ['id'=>'cmd_hidden']); ?>
+        <?= Html::textarea("sourcecode", '', ["id"=>"cmd", 'placeholder'=>"type code..", "rows"=>"0", "style"=>"width:100%;", "class"=>"cmd_line form-control"] ); ?>
+        <div class="input-group-btn">
+        <?= Html::button('Send', ['class'=>'btn btn-primary', 'style'=>'padding: 8px 12px;', 'onclick'=>'tryCode();']); ?>
+        </div>
+    </div>
+
+    <div id="dump_obj" class="pull-left" style="margin:0;margin-bottom:2px; max-width:100%;overflow:auto"></div> <!--- box dump obj --->
+    <div id="tree_obj" class="pull-left" style="overflow: auto"></div>
+    <div id="properties" class="pull-left" style="overflow: auto"></div>
+    <!--<div class="clearfix"></div>-->
+
+    <div id="method" class="pull-left" style="overflow:auto;"></div>
+    <div id="method_val" class="pull-left" style="width:80%;  overflow-x:hidden; overflow-y: auto;"></div>
+    <div id="method_ref" class="pull-left" style="margin-top:2px; overflow: auto"></div>
+</div>
+<div class="clearfix"></div>
+                                                 
+<?php
+$this->registerJs("
+    // GET QUERY PARAM IF EXIST
+    $('body').ready( function(){
+        var param = getQueryParam();		console.log('PARAMS : ', param);
+        if(param.obj)
+            getClass(param.obj);
+    }); 
+    // GET PARAM FOR ALL ITEMS MENU  
+    $('.get-class').click(function(){       //console.log(this.href); console.log( decodeURIComponent(this.href));
+        event.preventDefault();
+        var param = getQueryParam(this.href);		console.log('PARAMS : ', param, Object.keys(param).length);
+        if(param){ 
+            if( Object.keys(param).length==1)
+                getClass(param.obj);
+            else
+                decClass(param.obj);
+        }
+    });
+    
+    $('#obj_requested').on('change paste', function(){	
+        $('#resend_obj').show();
+    });
+    
+    function getQueryParam(url) {  // console.log('URL : ',url);
+        var args = {}
+        var url_pairs = (url) ? url.split('?').slice(-1).toString().split('&') : location.search.substring(1).split('&');    //console.log('URL PAIR : ', url_pairs);
+
+        for(var i = 0; i < url_pairs.length; i++) {
+            var pos = url_pairs[i].indexOf('=');          // Look for 'name=value'
+            if (pos == -1) continue;                  // If not found, skip
+            var argname = url_pairs[i].substring(0,pos);  // Extract the name
+            var value = url_pairs[i].substring(pos+1);    // Extract the value
+            value = decodeURIComponent(value);        // Decode it, if needed
+            args[argname] = value;                    // Store as a property
+        }                            
+       return args;                          
+    };
+    
+    $('.opt_check').change(function(){  
+        if($('#obj_requested').val()) $('#resend_obj').show();
+    });
+    
+    $('#mode').change(function(){  //alert( $(this).val());
+        var list_uncode = ['show_dump_obj', 'show_tree_obj', 'show_method_val'];
+        if($('#obj_requested').val()) $('#resend_obj').show();
+        if($(this).val()=='code')
+            $.each(list_uncode, function(i, id){ $('#'+id).prop('checked', false); });
+        else
+            $.each(list_uncode, function(i, id){ $('#'+id).prop('checked', true); });
+    });"
+);
+?>
+
+ <?php 
+//$this->registerJs($script, $position);
+// where $position can be View::POS_READY (the default), 
+// or View::POS_HEAD, View::POS_BEGIN, View::POS_END
+
+#GET DECLARED CLASS
+$this->registerJs("
+    var list_obj; // list object class
+    var list_ref_method;  // list method reef collections
+    var class_name;  // class name will fetched
+    var con_method = {id: 'method', label:'Class Method'};  // for generate id tag panel
+    var con_method_val = {id: 'method_val', label: 'Value get-method', column: ['method','value','class']}
+    var con_method_ref = {id: 'method_ref', label: 'Refrection of Class Method'}
+        con_method_ref.column = ['name', {label: 'Par.req.', name:'NumberOfRequiredParameters'}, {label:'Par.num.',name:'NumberOfParameters'}, {label:'Params', name:'Parameters', 'min-width':'150px'}, {label:'Document Comment', name:'DocComment'}, 'class', 'types'];
+        
+	// GET RESULT
+	function getClass(val){ 	  
+        event.preventDefault();
+        $('#obj_requested').val(val);  $('#resend_obj').hide();
+        
+        var opt ={
+            show_properties : 1,
+            show_cmd : ($('#show_cmd').is(':checked')) ? 1 : 0,
+            show_dump_obj : ($('#show_dump_obj').is(':checked')) ? 1 : 0,
+            show_tree_obj : ($('#show_tree_obj').is(':checked')) ? 1 : 0,
+            show_method : ($('#show_method').is(':checked')) ? 1 : 0,
+            show_method_val : ($('#show_method_val').is(':checked')) ? 1 : 0,
+            show_method_ref : ($('#show_method_ref').is(':checked')) ? 1 : 0,
+        }
+        
+        var reset_list_box = ['dump_obj', 'tree_obj', 'properties', 'method', 'method_ref', 'method_val'];   console.log('RESET LIST BOX', reset_list_box);
+        var active_list_box =[ ];
+        $.each(opt, function(i, v){ if(v && i !=='show_cmd')   active_list_box.push( i.replace('show_', '') ); });   console.log('ACTIVE LIST BOX', active_list_box);
+        
+		$.ajax({
+            url: 'fetch',
+            type: 'POST',
+			dataType: 'json',
+            data : { kelas : val, option: opt },
+            beforeSend :function(){
+                $('#load').show();
+                $('#panel_dump_obj').remove();  // remove panel if exist
+                $('#panel_dec_class').remove();
+                $('#method_res').remove();
+                $('#mainBox').hide();
+                $('#toggleShow').html('').hide();
+				$.each(reset_list_box, function(x, id){  $('#'+id).css({'padding':0, 'height' : '0px', 'min-width':'0px', 'width': '0px'}).html('') });
+                $.each(active_list_box, function(x, id){ $('#'+id).css({'padding': '5px', 'height': '200px', 'min-width':'350px'}).addClass('box1').show(); });
+            },
+			success: function(data){ 	 console.log('sucess', data);  //alert(data.parent_label);
+				//$.each(active_list_box, function(x, box){ box.addClass('well well-sm') });
+					
+                /* MAIN RESULT */
+                if(opt.show_dump_obj){
+                    $('#dump_obj').html(data.dump_obj);  			
+                    panelBtn_float('dump_obj', '200px', false);
+                }
+                    
+				if(data.class_name !== null){
+                    class_name = data.class_name;
+                    list_ref_method = data.method_ref;    // save for search method later    
+                    $.each(active_list_box, function(x, id){ $('#toggleShow').append('<span class=\"btn btn-default\" onclick=\"$(\'#'+id+'\').toggle(); $(this).toggleClass(\'active\'); \">'+id+'</span>').show(300); });
+                
+                    /* Badge class request with parent class documentatios */
+                    $('#panel_class').html( formattBadgeClassDoc(data.parent_label) );
+
+                    $('#properties').html( fetch_obj(data.class_properties, 'properties', 'Class Properties',null, null) );  //fetch_obj(obj, id_tag, label, arr_except, items)
+                    
+                    if(opt.show_method)
+                        fetch_method( data.method_ref, null);   // fetch_method( obj, sort);
+						
+					/* get table for all method */
+                    if(opt.show_method_ref)
+                        format_table( data.method_ref, con_method_ref, true, null);  // format_table(obj, id, sort, query);
+                    
+					/* get table for get method & result */
+                    if(opt.show_method_val)
+                        format_table( data.method_val, con_method_val, false, null);  // format_table(obj, id, sort, query)
+                    
+                    if(opt.show_cmd){    
+                        $('#cmd').val(data.cmd).parent().show();
+                        $('#cmd_hidden').val(data.cmd);   // FOR REFRESH FETCH KELAS
+                    }
+                    if(opt.show_tree_obj)
+                        $('#tree_obj').css({'min-width':'', 'width':'auto', 'max-width':'500px'}).html( fetch_obj(data.obj, 'tree_obj', 'Tree Object',null, null) );			// jQuery.parseJSON('response from server')
+                }
+				else 
+					$.each(active_list_box, function(x, box){ box.html('tidak ada data') });
+			},
+			error: function(xhr, status, errorThrown) {	console.log('error ', xhr); //Type: Function( jqXHR jqXHR, String textStatus, String errorThrown )
+				$('#dump_obj').show().css({'height':'auto', width:'auto'}).html( '<b class=text-danger>' + status +' : '+ xhr.responseText + '</b>');
+			},
+            complete: function(data){ 
+                $('#load').hide();  $('#mainBox').show();
+            }
+        });
+	}
+
+	function decClass(val){	//alert(val);
+        $('#panel_dec_class').remove();
+        $('#dec_class').html('<div class=\'loading\'>loading..</div>');
+                
+        $.get('declare_class', {var: val}, function(data){ 
+            panelBtn_float('dec_class', '100px', false);
+            $('#dec_class').addClass('well well-sm').html('<span class=badge badge-inverse>Declared Classes</span> <pre>'+ data +'</pre>');
+        } );
+	}"	,$this::POS_END   # Defaults to View::POS_READY.
+);
+
+$global_script = <<< JS
+    function fetch_method(obj, sort){  console.log('DATA : ', sort, obj)
+        obj = (obj !=undefined) ? obj : list_ref_method;
+        data = sortClass(sort, obj);     console.log('SORT : ', data);
+         
+        var items = [];      
+        $.each(data, function(key, val) {	   
+            pars = (val.params) ? formatParam(val.params) : null; 
+            css = (val.class==class_name) ? "text-primary" : "text-danger";
+            res =  '<li><a href="#" class='+css+' onclick="tryMethod(\''+ val.name +'\');">' + val.name + '(' + pars+ ')</a></li>';
+            items.push(res);
+        });              //console.log('TABLE : ', items)
+
+        container_id = 'con_'+con_method.id;
+
+        if( $('#'+container_id).length==0){
+            panel_tpl = panelBtn_fixed(container_id, con_method.label, true);   // panelBtn_fixed(id_tag, label, sort)
+            content = panel_tpl + '<div class="clearfix"></div> <ul id=\"'+container_id+'\" style="">' + items.join("") +'</ul>';
+            $('#method').css({'min-width':'', 'width':'auto'}).html( content );	
+        }
+        else $('#'+container_id).html( items.join("") );	
+    }
+    
+	function format_table(obj, con, sort, q){  //console.log('===>', con, sort, obj);	//alert(obj.length);
+        var css = 'simpleTbl';   // return "Data Kosong (check on server)";
+        obj = (obj !=undefined) ? obj : list_ref_method;
+        obj = (sort && q!=null) ? sortClass(q, obj) : obj;
+        
+        var items = [];    
+        items.push('<table class=\"'+css+'\">');
+        if(con.column) 
+            $.each(con.column, function(key, col) {	
+                icon_toggle = '<span class="glyphicon glyphicon-remove-circle pull-right" aria-hidden="true" onclick="toggleCol(\'.td-'+key+'\');"></span>';
+                if( typeof col==='object' )
+                    items.push('<th nowrap class=\"td-'+key+'\" width='+ (col.width || 'auto') +' onClick="$(\'.td-'+key+'\').toggleClass(\'nowrap\');">'+ col.label + icon_toggle +'</th>');
+                else
+                    items.push('<th nowrap class=\"td-'+key+'\" onClick="$(\'.td-'+key+'\').toggleClass(\'nowrap\');">'+ col + icon_toggle +'</th>');
+            });	
+                
+        $.each( obj, function(key, val) {	  
+            items.push('<tr>');
+            if(con.column){                       //console.log(con.column);
+                var i =1;
+                var obj_class = 'col'+i+'-'+key;
+                    
+                $.each(con.column, function(x, col) {	
+                    data = (typeof col =='object') ? col.name : col;	//console.log(data);
+                    if( typeof val[data]==='object' ){
+                        if(! $.isEmptyObject(val[data])){
+                            label = (val.class_value !=undefined) ? val.class_value : '';
+                            res = '<td class=\"td-'+x+'\">'
+                                + '<ul style=\"list-style-type:square\">'
+                                + '<li class=\'label label-success\' onClick=$(\".'+obj_class+'\").slideToggle(\"slow\");>'+label+' ('+typeof val[data]+')</li>'
+                                + '<ul class=\"'+obj_class+'\" style=\'display:none;list-style-type:decimal\'> '+ getObject( val[data], obj_class ) + '</ul></ul>'+
+                                '</td>' 
+                        } else res = '<td>('+typeof val[data]+') -- null </td>';
+                        items.push(res);
+                    }
+                    else{
+                        var res;
+                        if(data=='method') res = '<strong style="color:coral">' + val[data] + '</strong>';
+                        else if (data=='class') res = '<strong class=text-primary>' + val[data] + '</strong>';
+                        else if (data=='Parameters') res = (val[data]) ? formatParam(val[data]) : null;
+                        else if(data=='DocComment') res = getFormatDoc(val[data]); 
+                        else res = val[data];
+                            
+                        res =  '<td class=\"td-'+x+'\">' + res + '</td>';
+                        items.push(res);
+                    }
+                    i++;
+                });
+            }
+            // else
+                // items.push('<td>' + val + '</td>');
+            items.push('</tr>');
+        });
+        items.push('</table>');
+            
+        container_id = 'con_'+con.id;
+        if( $('#'+container_id).length==0){
+            panel_tpl = panelBtn_fixed(container_id, con.label, sort);  // panelBtn_fixed(id_tag, label, sort)
+            content = panel_tpl + '<div class="clearfix"></div> <div id=\"'+container_id+'\">' + items.join("") +'</div>';
+            $('#'+con.id).css({'min-width':'', 'width':'auto'}).html( content );	
+        }
+        else $('#'+container_id).html( items.join("") );
+	}
+    
+    function tryMethod(method){
+        $('#method_res').remove();
+        var cmdSet = $('#cmd_hidden').val(); 
+        
+        // FORM COMMAND CONSOLE
+        if(cmdSet.match(/new/)){
+            cmdSet = cmdSet.replace(/return/,'').trim();
+            $('#cmd').val( '\$var='+cmdSet+ ' \\nreturn \$var->'+method+'();');
+            //$('#cmd').val( '\$var='+cmdSet+ ' \\nreturn \$var->'+method+';');
+        }
+        else{
+            var pos = cmdSet.length -1;    //console.log(pos);
+            $('#cmd').val( cmdSet.trim().substring(0, pos)+ '->'+ method +'();' );
+            //$('#cmd').val( cmdSet.trim().substring(0, pos)+ '->'+ method +';' );
+        }
+        
+        var except = ['name','par_req','par_num'];  // except detail method of ..
+        var class_details = list_ref_method[method];    console.log('==>', class_details);
+        var list=[]
+        $.each(class_details, function(key,val){
+            if( $.inArray( key, except ) == -1) {
+                if(key=='Parameters') res = '<li><strong style="color:chartreuse">'+key+' : </strong><strong style="color:aqua">'+formatParam(val)+'</strong></li>';
+                else if(key=='DocComment') res = '<li><strong style="color:chartreuse">'+key+' : </strong><ul style="margin-left:10px;color:yellow">' + getFormatDoc(val) +'</ul></li>';
+                else if(key=='types') res = '<li><strong>'+key+' : '+JSON.stringify( filterMethodType(val), null,2)+'</strong></li>';
+                else if(typeof val=='object' && ! $.isEmptyObject(val) ) res = '<li><strong>'+key+' : '+JSON.stringify(val,null,2)+'</strong></li>';
+                else res = '<li> <strong>'+key+' : </strong>'+val+'</li>';
+                list.push(res);
+            }
+        });
+        var tpl ='<pre id="method_res" class="method_res"> <strong style="font-size:12px;color:coral;margin-left:5px">Method detail of '+method+'</strong><ul>'+list.join("")+'</ul></pre>';
+        $('#method').after(tpl);  
+        $('#method').css({'height': $('#method_res').height() });
+    }
+    
+    function tryCode(){
+        $.ajax({
+			url: 'code_test', type: 'POST',
+			data : { cmd: $('#cmd').val() },
+            //dataType: 'json',
+			beforeSend :function(){
+                $('#panel_dec_class').remove();
+				$('#method_res').html('<div class=\'loading\'>loading..</div>') 
+			},
+			success: function(data){           //console.log('RESULT : ', typeof data, data);
+                if( $('#method_res').length==1)  $('#method_res').html(data);
+                else $('#method').after( '<pre id="method_res" class="method_res">'+data+'</pre>' );
+			},
+            error: function(xhr, status, errorThrown) {	
+				if( $('#method_res').length==1)  $('#method_res').html( status +' : '+ xhr.responseText );
+                else $('#method').after( '<pre id="method_res" class="method_res">'+status +' : '+ xhr.responseText+'</pre>' );
+			},
+		});
+    }
+    
+    function formatParam(data){     //console.log('PARAMS :', data)
+        var params=[];
+        pars = data.split(',');
+        $.each(pars, function(i, par){
+            p = (par) ? /[\[\]][^\[\]]*[\[\]]/.exec(par).toString() : 'kosong';
+            params.push(p);
+        });    
+        params = params.join('');  //console.log('PARAMS RESULT =>', params);
+        return params;
+    }
+
+    function filterMethodType(obj){
+        var res={}; 
+        _.filter(obj, function(val,type){ 
+            if(val==true)return res[type]= val;
+        });     //console.log(res)
+        return res;
+    }
+    
+    function sortClass(order, obj){  console.log('SORT ORDER :', order);
+        data = (obj !=undefined) ? obj : list_ref_method;   console.log('===>', Object.keys(data).length, data);
+        var class_items={};
+        var exists=[];
+        
+/*         if(order==undefined){
+            order =['_public','_protected', '_private', '_static', '_abstract'];  // SORT FOR ORDER ARRAY"_public"..etc
+            $.each(order, function(i, type){
+                $.each(data, function(key, val){
+                    if( val[type] && $.inArray( key, exists ) == -1){
+                        class_items.is[key]=val; 
+                        exists.push(key);
+                    }
+                    else if( $.inArray( val.params, order ) == -1){   
+                        class_items[key]=val; 
+                        //remains.push(key);  
+                    }
+                });
+            });  console.log('SORT : ', class_items); //console.log('REMAINS : ', remains);
+        } */
+        
+        if(order==undefined){
+            order =['isUserDefined','isPublic','isProtected','isStatic','isPrivate'];  // SORT FOR ORDER ARRAY"_public"..etc
+            $.each(order, function(i, sort){
+                $.each(data, function(key, val){    //console.log('+++++++', key+' : ',val);
+                    if( val[sort] && $.inArray( key, exists ) == -1){
+                        class_items.types[key]=val; 
+                        exists.push(key);
+                    }
+                    else if( $.inArray( val.params, order ) == -1){   
+                        class_items[key]=val; 
+                        //remains.push(key);  
+                    }
+                });
+            });  
+        }
+        else{   // ORDER BY USER DEFINE USING REGEXP. CONTOH: /find/ 
+            pattern = new RegExp( order );
+            // $.each(data, function(key, val){
+                // if( pattern.exec(key)){ console.log('FOUND : ', key);
+                    // class_items[key]=val; 
+                    // exists.push(key);
+                // }
+                // else
+                    // class_items[key]=val; 
+            //});
+            var class_items = _.sortBy(data, function(key,val){ if( pattern.exec(val)) return val; }); 
+        }                 console.log('SORT RESULT : ', Object.keys(class_items).length, class_items);
+        return class_items;
+    }
+    
+	function getObject( obj, id_tag, items ) {		 //alert($.isEmptyObject(obj));
+		if( $.isEmptyObject(obj) ) {		//alert('test'+obj + typeof obj);
+			return "empty";
+		}
+		if(! items) var items=[];
+		var items=[];
+		var i =1;
+
+		$.each( obj, function(key, val) {	//alert(key);
+			var kelas = id_tag + '-' + i;
+
+			 if( typeof val=='object'  && ! $.isEmptyObject(val) ){  			
+				items.push(' <li onClick=$(\".'+kelas+'\").slideToggle(\"slow\");><span class=\'text-primary\'>  ('+ kelas +') ' + key +' : </span><i style=\"color:green\">' + val + '</i> ('  + typeof val +')</li>' +
+					'<ul class='+kelas+' style=\'display:none\'>' );		//$.each( val, function(x, y) { alert(x + y); }); //alert($.isEmptyObject(val));
+				items.push( getObject( val, kelas, items ) );
+				items.push('</ul>');
+			}
+			else {  
+				items.push( '<li> <b>' + key + '('  + typeof key +')</b> :</b> ' + val + '<b class="text-muted"> ('  + typeof val +')</b></li>'  );  
+			}
+			i++;
+		});		
+		items = items.join(""); 
+		return items;
+	}
+	
+	function fetch_obj(obj, id_tag, label, arr_except, items) {	//alert(label + $.isEmptyObject(obj)); //alert(id_tag + 'id :' + obj.id);
+        if(! $.isEmptyObject(obj)){
+            if(! items) var items=[];
+            var x =1;
+            
+            $.each( obj, function(key, val) {	//console.log(key);	
+                var kelas = id_tag + x;											
+                
+                if( typeof val =='function'){		//alert(key);
+                     if($.inArray( key, arr_except ) == -1) {  
+                        if( obj[key]()=='[object Object]') { 	
+                            items.push( '<li class=\'text-primary\' onClick=$(\".'+kelas+'\").slideToggle(); > ('+ x +')' + key + ' : ' + obj[key]() + 
+                                '<b class="text-muted">('  + typeof val +') </b></li> <ul class='+kelas+' style=\'display:none\'>' );
+                            getObject( obj[key](), items, x, id_tag );			//alert('isArray!'); 
+                            items.push('</ul>');
+                        }
+                        else { items.push( '<li> <b>' + key + ' :</b> ' + obj[key]() + ' <b class="text-muted">('  + typeof val +')</b></li>' ); }
+                    }
+                }
+                else if( typeof val=='object'  && ! $.isEmptyObject(val) ){  	
+                    items.push( '<li class=\'text-primary\' onClick=$(\".'+kelas+'\").slideToggle(); >  ('+ x +')' + key + ' : ' + '<b class="text-muted">('  + typeof val +') </b></li>'
+                    +'<ul class='+kelas+' style=\'display:none; -webkit-padding-start: 20px;\'>' );
+                        fetch_obj( val, kelas, label, null, items); 			
+                    items.push('</ul>');
+                }
+                else { 
+                    val = ( typeof key=='string' && key.match(/_memoryReserve/)) ? '<span class="text-">'+ val.substr(1,10)+'...('+val.length+' bytes) </span>' : val;
+                    items.push( '<li> <b>' + key + ' :</b> ' + val + ' <b class="text-muted">('  + typeof val +')</b></li>' ); 
+                }
+                x++;
+            });
+            items = items.join("");   //alert(items);
+            
+            panel = panelBtn_fixed('panel_'+id_tag, label);
+            return panel + '<div class="clearfix"></div> <ul id=\"panel_'+id_tag+'\" style="margin:0px; overflow:auto; -webkit-padding-start:20px">' + items +'</ul>';
+        }
+        else return "Empty";
+	}
+    
+    function getFormatDoc(data){  
+        return (data) ? data.replace(/[\/\*\\n]/g,'').trim().replace(/\@/g,'<br>@') : '<span class="text-danger">null</span>';
+    }
+    
+    // PANEL BUTTON FOR HEADER 
+	function panelBtn_float(id_tag, height, panelOff){	
+		var par = "#"+id_tag;  
+		var box_btn = ($('#'+id_tag_attr).width()) ? $('#'+id_tag_attr).width() : 135;		//alert($(par).width());
+		var margin_left = ($(par).width()) ? ($(par).width() - box_btn)+'px' : '98%';  		//alert( box_btn );//alert( $('#'+id_tag).width() );
+		var id_tag_attr = 'panel_'+id_tag;
+		
+		//$(par).css({'height' : height, 'overflow' : 'auto'});
+
+		var panel = '<div  id="'+id_tag_attr+'" class="btn-group pull-right" style="position: absolute; margin-left:' + margin_left+ ';">'+
+			'<div class="task_'+id_tag_attr+' glyphicon glyphicon-zoom-in btn btn-default" title="Maximize" onClick="$(\'#'+id_tag+'\').animate({height:\'100%\'}, \'slow\');"></div>'+
+			'<div class="task_'+id_tag_attr+' glyphicon glyphicon-zoom-out btn btn-default" title="Miximize" onClick="$(\'#'+id_tag+'\').css({\'height\': \'100px\', \'overflow\':\'auto\'}).scrollTop($(\'#'+id_tag+'\').height());"></div>'+
+			//'<div class="glyphicon glyphicon-remove btn btn-default" title="close" onClick="$(\'#'+id_tag+'\').slideUp(); $(\'#toggle-'+id_tag_attr+'\').show(1000);"></div>'+
+			'<div class="task_'+id_tag_attr+' glyphicon glyphicon-off btn btn-default" title="close" onClick="$(\'#'+id_tag_attr+'_toggle\').show(); $(\'.task_'+id_tag_attr+'\').slideUp(); $(\'#'+id_tag_attr+'\').css({\'position\': \'relative\'}); $(\'#'+id_tag+'\').slideUp();"></div>'+
+			'<div id="'+id_tag_attr+'_toggle" class="glyphicon glyphicon-refresh" title="Show" onClick="$(\'#'+id_tag+'\').slideToggle(); $(this).hide(); $(\'.task_'+id_tag_attr+'\').show(); $(\'#'+id_tag_attr+'\').css({\'position\': \'absolute\'});" style="display:none"></div>'+
+			'</div>';
+		if(!panelOff)
+			$(par).before(panel);
+		else
+			return panel;
+	};
+	
+	function panelBtn_fixed(id_tag, label, sort){	
+        var sorter = (sort) ?  '<div class="pull-left" style="margin-left:5px"> SortBy Name : '+ getSorter(id_tag) + '</div>' : ""; 
+		var panel =  '<div class="badge pull-left" onClick="$(\'#'+id_tag+'\').slideToggle();">'+ label +'</div>'+ sorter +
+			'<div class="btn-group-xs pull-right" style="padding:0px;">'+
+			'<div class="glyphicon glyphicon-expand" title="Maximize" onClick="$(\'#'+id_tag+'\').parent().animate({height:\'100%\'}, \'slow\');"></div>'+
+			'<div class="glyphicon glyphicon-collapse-down" title="Miximize" onClick="$(\'#'+id_tag+'\').parent().css({\'height\': \'200px\', \'overflow\':\'auto\'});"></div>'+
+            '<div class="glyphicon glyphicon-collapse-up" title="close" onClick=" $(\'#'+id_tag+'\').slideToggle().parent().css({\'height\':\'auto\'});"></div>'+
+			'</div>';
+		return panel;
+	}
+	
+    function getSorter(id_tag){    
+        switch(id_tag){
+            case 'con_method' : return '<input type="text" id="sorter-' +id_tag+'" onchange="fetch_method(list_ref_method, this.value);" style="line-height: normal;width:100px"/>';
+            // case 'panel_tree_obj' : return '<input type="text" id="sorter-' +id_tag+'" onchange="fetch_method(list_ref_method, this.value);"/>';
+            case 'con_method_ref' : return '<input type="text" id="sorter-' +id_tag+'" onchange="format_table(list_ref_method, con_method_ref, true, this.value);" style="line-height: normal;"/>';
+        }
+    }
+    
+	function formattBadgeClassDoc(obj){	//alert(obj);      yii\BaseYii => yii-baseyii.html, yii\web\Application => yii-base-application.html
+		if( ! $.isEmptyObject(obj)) {  
+		var labels=[];
+		$.each(obj, function(key, val){ 
+            if(key==class_name)
+                labels.push('<a href=\"'+ val.doc_url + '\" class=\"label label-warning\" target=_blank>' + val.class_alias + '</a>');
+            else{
+                labels.push(' &#9002;&#9002; ');
+                labels.push('<a href=\"'+ val.doc_url + '\" class=\"label label-success\" target=_blank>' + val.class_alias + '</a>'); 
+            }
+		});
+		return labels.join("");
+	}}
+	
+    function toggleCol(obj){  //console.log(obj);
+        $(obj).hide(100);
+    }
+    
+    function toggleCheck(obj){
+        if( $('#'+obj).is(':checked') ) $('#'+obj).prop('checked', false);  
+        else $('#'+obj).prop('checked', true);  
+        if($('#obj_requested').val()) $('#resend_obj').show();
+    }
+JS;
+
+$this->registerJs($global_script ,$this::POS_END );
+?>
+ 
+ 
+<?php $this->beginBlock('username', true) ?>
+ * Umm... hello?
+<?php $this->endBlock() ?>
+
+<!------------------------------------------------------------------------------------------------------------------------------------------>
+<pre>
+Use the new AssetBundle and AssetManager functionality with the View object in Yii2, to manage these assets and how they are loaded.
+
+Alternatively, inline assets (JS/CSS) can be registered at runtime from within the View. For example you can clearly simulate the ajaxLink feature using a inline javascript. Its however recommended if you can merge where possible, client code (JS/CSS) into separate JS/CSS files and loaded through the AssetBundle. Note there is no more need of a CClientScript anymore:
+
+$script = <<< JS
+$('#el').on('click', function(e) {
+    $.ajax({
+       url: '/path/to/action',
+       data: {id: '<id>', 'other': '<other>'},
+       success: function(data) {
+           // process data
+       }
+    });
+});
+JS;
+$this->registerJs($script, $position);
+// where $position can be View::POS_READY (the default), 
+// or View::POS_HEAD, View::POS_BEGIN, View::POS_END
+Total 1 comment
+#18293report it01
+chrisvoo at 2014/10/12 03:20pm
+For javascript IDE support
+Supposing you want to use a jquery plugin in your view, you can:
+
+put all your CSS/JS file in app\assets\AppAsset;
+create a js folder in the web folder (or in another location of your choice)
+put in the previously created folder a js file for your view;
+include the content of the file and register the javascript
+$jsView = file_get_contents(Yii::getAlias('@webroot/js/myfile.js'));
+$this->registerJs($jsView, View::POS_END);
+(optional) you can use a naming convention for your js files: name them as <ID_CONTROLLER>_<ID_ACTION> and include it with:
+$contrAction = Yii::$app->urlManager->parseRequest(Yii::$app->request)[0];
+$contrAction = str_replace("/", "_", $contrAction);
+$jsView = file_get_contents(Yii::getAlias('@webroot/js/'.$contrAction.".js"));
+ </pre>

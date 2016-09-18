@@ -1,0 +1,55 @@
+<?php
+
+namespace app\models;
+
+use Yii;
+
+/**
+ * This is the model class for table "{{%tbl_pic}}".
+ *
+ * @property string $pic_id
+ * @property string $filename_ori
+ * @property string $title
+ */
+class Pic_yiitest extends \yii\db\ActiveRecord
+{
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return '{{%tbl_pic}}';
+    }
+
+    /**
+     * @return \yii\db\Connection the database connection used by this AR class.
+     */
+    public static function getDb()
+    {
+        return Yii::$app->get('db_yiitest');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['pic_id'], 'required'],
+            [['pic_id', 'filename_ori'], 'string', 'max' => 50],
+            [['title'], 'string', 'max' => 100]
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'pic_id' => Yii::t('app', 'Pic ID'),
+            'filename_ori' => Yii::t('app', 'Filename Ori'),
+            'title' => Yii::t('app', 'Title'),
+        ];
+    }
+}

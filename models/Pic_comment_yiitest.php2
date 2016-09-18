@@ -1,0 +1,61 @@
+<?php
+
+namespace app\models;
+
+use Yii;
+
+/**
+ * This is the model class for table "{{%tbl_pic_comment}}".
+ *
+ * @property integer $id
+ * @property string $pic_id
+ * @property string $comment
+ * @property integer $from_id
+ * @property string $tgl
+ */
+class Pic_comment_yiitest extends \yii\db\ActiveRecord
+{
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return '{{%tbl_pic_comment}}';
+    }
+
+    /**
+     * @return \yii\db\Connection the database connection used by this AR class.
+     */
+    public static function getDb()
+    {
+        return Yii::$app->get('db_yiitest');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['pic_id', 'comment', 'from_id', 'tgl'], 'required'],
+            [['from_id'], 'integer'],
+            [['tgl'], 'safe'],
+            [['pic_id'], 'string', 'max' => 20],
+            [['comment'], 'string', 'max' => 255]
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => Yii::t('app', 'ID'),
+            'pic_id' => Yii::t('app', 'Pic ID'),
+            'comment' => Yii::t('app', 'Comment'),
+            'from_id' => Yii::t('app', 'From ID'),
+            'tgl' => Yii::t('app', 'Tgl'),
+        ];
+    }
+}

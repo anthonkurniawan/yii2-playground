@@ -1,0 +1,23 @@
+<NotepadPlus>
+    <Session activeView="0">
+        <mainView activeIndex="5">
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="537" startPos="102" endPos="102" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\web\index.php" backupFilePath="" originalFileLastModifTimestamp="1426414094" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="314" startPos="204" endPos="204" selMode="0" lang="Normal Text" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\yii" backupFilePath="" originalFileLastModifTimestamp="1426007811" />
+            <File firstVisibleLine="62" xOffset="25" scrollWidth="1130" startPos="6701" endPos="6701" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\config\web.php" backupFilePath="" originalFileLastModifTimestamp="1435070690" />
+            <File firstVisibleLine="6" xOffset="0" scrollWidth="428" startPos="1042" endPos="1042" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\config\console.php" backupFilePath="" originalFileLastModifTimestamp="1431916748" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="392" startPos="121" endPos="121" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\commands\RbacFileController.php" backupFilePath="" originalFileLastModifTimestamp="1432238692" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="786" startPos="361" endPos="361" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\commands\CmdTestController.php" backupFilePath="" originalFileLastModifTimestamp="1435095762" />
+            <File firstVisibleLine="150" xOffset="0" scrollWidth="1206" startPos="6191" endPos="6191" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\controllers\ToolsController.php" backupFilePath="" originalFileLastModifTimestamp="1434993879" />
+            <File firstVisibleLine="72" xOffset="0" scrollWidth="542" startPos="2935" endPos="2949" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\vendor\yiisoft\yii2\console\controllers\HelpController.php" backupFilePath="" originalFileLastModifTimestamp="1431805741" />
+        </mainView>
+        <subView activeIndex="3">
+            <File firstVisibleLine="626" xOffset="0" scrollWidth="1266" startPos="35503" endPos="35503" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\views\tools\kelas.php" backupFilePath="" originalFileLastModifTimestamp="1435075759" />
+            <File firstVisibleLine="814" xOffset="0" scrollWidth="633" startPos="27108" endPos="27103" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\vendor\yiisoft\yii2\helpers\BaseConsole.php" backupFilePath="" originalFileLastModifTimestamp="1431805743" />
+            <File firstVisibleLine="16" xOffset="0" scrollWidth="559" startPos="15573" endPos="15598" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\vendor\yiisoft\yii2\console\Controller.php" backupFilePath="" originalFileLastModifTimestamp="1431805741" />
+            <File firstVisibleLine="18" xOffset="0" scrollWidth="535" startPos="8450" endPos="8450" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\vendor\yiisoft\yii2\base\Controller.php" backupFilePath="" originalFileLastModifTimestamp="1431805739" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="381" startPos="187" endPos="187" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\vendor\yiisoft\yii2\console\controllers\MigrateController.php" backupFilePath="" originalFileLastModifTimestamp="1431805741" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1" startPos="0" endPos="0" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\vendor\yiisoft\yii2\console\controllers\AssetController.php" backupFilePath="" originalFileLastModifTimestamp="1431805741" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="644" startPos="648" endPos="648" selMode="0" lang="PHP" encoding="-1" filename="D:\WEB\YII2\YII2-BASIC-TEST\vendor\yiisoft\yii2\BaseYii.php" backupFilePath="" originalFileLastModifTimestamp="1431805738" />
+        </subView>
+    </Session>
+</NotepadPlus>
